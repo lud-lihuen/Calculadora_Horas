@@ -1,3 +1,7 @@
+const inputs = document.querySelectorAll('.entrada, .salida');
+const totalElementos = document.querySelectorAll('.horas');
+const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+
 // Función para calcular las horas trabajadas en un día
 function calcularHorasDia(entrada, salida) {
     let horaEntrada = new Date(`2000-01-01T${entrada}`);
@@ -9,7 +13,6 @@ function calcularHorasDia(entrada, salida) {
 
 // Función para actualizar los totales
 function actualizarTotales() {
-    const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
     let totalHoras = 0;
 
     diasSemana.forEach(dia => {
@@ -31,9 +34,48 @@ function actualizarTotales() {
     document.getElementById('total').textContent = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
 }
 
-// Evento para cambios en los inputs
+// Función para guardar datos ingresados en local storage
+function guardar() {
+    let dataToSave = {};
+    inputs.forEach(input => {
+        dataToSave[input.classList[1]] = input.value;
+    });
+    localStorage.setItem('horasTrabajadas', JSON.stringify(dataToSave));
+}
+
+// Función para cargar datos guardados en local storage
+function cargar() {
+    let savedData = JSON.parse(localStorage.getItem('horasTrabajadas'));
+    if (savedData) {
+        inputs.forEach(input => {
+            if (savedData[input.classList[1]]) {
+                input.value = savedData[input.classList[1]];
+            }
+        });
+        actualizarTotales();
+    }
+}
+
+// Función para reiniciar contadores a cero
+function reiniciar() {
+    inputs.forEach(input => {
+        input.value = '';
+    });
+    totalElementos.forEach(elemento => {
+        elemento.textContent = '00:00';
+    });
+    document.getElementById('total').textContent = '00:00';
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Evento para cambios en los inputs
     document.querySelectorAll('.entrada, .salida').forEach(input => {
         input.addEventListener('change', actualizarTotales);
     });
+    // Evento para botón guardar
+    document.getElementById('guardar').addEventListener('click', guardar);
+    // Evento para botón cargar
+    document.getElementById('cargar').addEventListener('click', cargar);
+    // Evento para botón reiniciar
+    document.getElementById('reiniciar').addEventListener('click', reiniciar);
 });
