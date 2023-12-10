@@ -2,6 +2,16 @@ const inputs = document.querySelectorAll('.entrada, .salida');
 const totalElementos = document.querySelectorAll('.horas');
 const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
+// Inicializar variables para guardar y cargar datos
+let horasEntradaGuardadas = {};
+let horasSalidaGuardadas = {};
+if (localStorage.getItem('horasEntradaGuardadas')) {
+    horasEntradaGuardadas = JSON.parse(localStorage.getItem('horasEntradaGuardadas'));
+}
+if (localStorage.getItem('horasSalidaGuardadas')) {
+    horasSalidaGuardadas = JSON.parse(localStorage.getItem('horasSalidaGuardadas'));
+}
+
 // Función para calcular las horas trabajadas en un día
 function calcularHorasDia(entrada, salida) {
     let horaEntrada = new Date(`2000-01-01T${entrada}`);
@@ -36,27 +46,32 @@ function actualizarTotales() {
 
 // Función para guardar datos ingresados en local storage
 function guardar() {
-    let dataToSave = {};
     inputs.forEach(input => {
-        dataToSave[input.classList[1]] = input.value;
+        if (input.classList.contains('entrada')) {
+            horasEntradaGuardadas[input.classList[1]] = input.value;
+        } else if (input.classList.contains('salida')) {
+            horasSalidaGuardadas[input.classList[1]] = input.value;
+        }
     });
-    localStorage.setItem('horasTrabajadas', JSON.stringify(dataToSave));
+    localStorage.setItem('horasEntradaGuardadas', JSON.stringify(horasEntradaGuardadas));
+    localStorage.setItem('horasSalidaGuardadas', JSON.stringify(horasSalidaGuardadas));
 }
 
 // Función para cargar datos guardados en local storage
 function cargar() {
-    let savedData = JSON.parse(localStorage.getItem('horasTrabajadas'));
-    if (savedData) {
+    if (horasEntradaGuardadas || horasSalidaGuardadas) {
         inputs.forEach(input => {
-            if (savedData[input.classList[1]]) {
-                input.value = savedData[input.classList[1]];
+            if (input.classList.contains('entrada') && horasEntradaGuardadas[input.classList[1]]) {
+                input.value = horasEntradaGuardadas[input.classList[1]];
+            } else if (input.classList.contains('salida') && horasSalidaGuardadas[input.classList[1]]) {
+                input.value = horasSalidaGuardadas[input.classList[1]];
             }
         });
         actualizarTotales();
     }
 }
 
-// Función para reiniciar contadores a cero
+// Función para reiniciar contadores a cero y borrar datos almacenados
 function reiniciar() {
     inputs.forEach(input => {
         input.value = '';
@@ -65,6 +80,7 @@ function reiniciar() {
         elemento.textContent = '00:00';
     });
     document.getElementById('total').textContent = '00:00';
+    localStorage.clear();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
